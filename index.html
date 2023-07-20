@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JSON to SQLite Converter</title>
+</head>
+<body>
+    <h1>JSON to SQLite Converter</h1>
+    <p>Paste your JSON data below and click 'Convert to SQLite' to download the SQLite database file.</p>
+    <textarea id="jsonTextarea" rows="10" cols="80"></textarea><br>
+    <button id="convertButton">Convert to SQLite</button>
+
+    <script>
+        document.getElementById("convertButton").addEventListener("click", function () {
+            const jsonTextarea = document.getElementById("jsonTextarea");
+            const jsonData = jsonTextarea.value.trim();
+            if (jsonData) {
+                try {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("POST", "/", true);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.responseType = "blob";
+                    xhr.onload = function () {
+                        if (xhr.status === 200) {
+                            const blob = new Blob([xhr.response], { type: "application/sqlite" });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = "sqlite.db";
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                        } else {
+                            alert("An error occurred while converting the JSON data to SQLite.");
+                        }
+                    };
+                    xhr.send(jsonData);
+                } catch (err) {
+                    alert("An error occurred: " + err.message);
+                }
+            } else {
+                alert("Please paste your JSON data.");
+            }
+        });
+    </script>
+</body>
+</html>
